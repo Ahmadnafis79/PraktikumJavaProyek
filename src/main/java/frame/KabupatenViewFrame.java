@@ -9,7 +9,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.*;
 
-public class KabupatenViewFrame extends JFrame{
+public class KabupatenViewFrame extends JFrame {
     private JPanel panel1;
     private JPanel mainPanel;
     private JPanel cariPanel;
@@ -25,26 +25,34 @@ public class KabupatenViewFrame extends JFrame{
     private JButton cetakButton;
     private JButton tutupButton;
 
-    public KabupatenViewFrame(){
+    public KabupatenViewFrame() {
+
         tutupButton.addActionListener(e -> {
             dispose();
         });
 
+
         batalButton.addActionListener(e -> {
             dispose();
+            isiTable();
         });
 
-        addWindowListener(new WindowAdapter(){
+        addWindowListener(new WindowAdapter() {
             @Override
-            public void windowActived(WindowEvent e){
+            public void windowActivated(WindowEvent e) {
                 isiTable();
             }
+        });
+
+        tambahButton.addActionListener(e -> {
+            KabupatenInputFrame inputFrame = new KabupatenInputFrame();
+            inputFrame.setVisible(true);
         });
 
         cariButton.addActionListener(e -> {
             Connection c = Koneksi.getConnection();
             String keyword = "%" + cariTextField.getText() + "%";
-            String seachSQL = "SELECT * FROM kabupaten WHARE nama like ?";
+            String seachSQL = "SELECT * FROM kabupaten WHERE nama like ?";
             try {
                 PreparedStatement ps = c.prepareStatement(seachSQL);
                 ps.setString(1, keyword);
@@ -52,27 +60,28 @@ public class KabupatenViewFrame extends JFrame{
                 DefaultTableModel dtm = (DefaultTableModel) viewTable.getModel();
                 dtm.setRowCount(0);
                 Object[] row = new Object[2];
-                while (rs.next()){
+                while (rs.next()) {
                     row[0] = rs.getInt("id");
                     row[1] = rs.getString("nama");
                     dtm.addRow(row);
                 }
-            } catch (SQLException ex){
+            } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
         });
 
         hapusButton.addActionListener(e -> {
             int barisTerpilih = viewTable.getSelectedRow();
-            if (barisTerpilih < 0){
+            if (barisTerpilih < 0) {
                 JOptionPane.showMessageDialog(null, "Pilih data dulu");
                 return;
             }
             int pilihan = JOptionPane.showConfirmDialog(null,
                     "Yakin mau hapus?",
-                    "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION
+                    "Konfirmasi Hapus",
+                    JOptionPane.YES_NO_OPTION
             );
-            if(pilihan == 0){
+            if (pilihan == 0) {
                 TableModel tm = viewTable.getModel();
                 int id = Integer.parseInt(tm.getValueAt(barisTerpilih, 0).toString());
                 Connection c = Koneksi.getConnection();
@@ -87,29 +96,25 @@ public class KabupatenViewFrame extends JFrame{
             }
         });
 
+
+
         isiTable();
         init();
     }
 
-    public void init() {
-        setContentPane(mainPanel);
-        setTitle("Data Kabupaten");
-        pack();
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-    }
 
-    public void isiTable(){
+
+    public void isiTable() {
         Connection c = Koneksi.getConnection();
         String selectSQL = "SELECT * FROM kabupaten";
         try {
             Statement s = c.createStatement();
             ResultSet rs = s.executeQuery(selectSQL);
-            String header[] = {"id","Nama Kabupaten"};
+            String header[] = {"id", "Nama Kabupaten"};
             DefaultTableModel dtm = new DefaultTableModel(header, 0);
             viewTable.setModel(dtm);
             Object[] row = new Object[2];
-            while (rs.next()){
+            while (rs.next()) {
                 row[0] = rs.getInt("id");
                 row[1] = rs.getString("nama");
                 dtm.addRow(row);
@@ -118,5 +123,14 @@ public class KabupatenViewFrame extends JFrame{
             throw new RuntimeException(e);
         }
     }
+
+    public void init() {
+        setContentPane(mainPanel);
+        setTitle("Data Kabupaten");
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
+        pack();
+    }
+}
 
 
